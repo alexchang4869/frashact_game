@@ -1,0 +1,129 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap");
+body {
+  font-family: "Noto Sans TC", sans-serif;
+}
+/* 背景 */
+.bg {
+  height: 100vh;
+  width: 100%;
+  background-image: url("../img/bg.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+/* 題目 */
+.topic {
+  font-size: 42px;
+  font-weight: 600;
+  width: 100%;
+}
+.topic-outer {
+  width: 96%;
+  height: 74px;
+  text-align: center;
+  position: relative;
+  margin: 0 auto;
+}
+.topic-bg {
+  background: white;
+  opacity: 0.5;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+/* 上下一題 */
+.pre-topic,
+.next-topic {
+  position: absolute;
+  top: 16px;
+  color: #3c3c3c;
+}
+.pre-topic:hover,
+.next-topic:hover {
+  cursor: pointer;
+  color: #0d6efd;
+}
+.pre-topic {
+  left: 8px;
+}
+.next-topic {
+  right: 8px;
+}
+.fa-circle-left,
+.fa-circle-right {
+  font-size: 42px;
+}
+
+/* 倒數計時 */
+.sec {
+  font-size: 144px;
+  padding: 0 60px;
+}
+
+/* 團隊分數標題 */
+.teamTitle {
+  width: 96%;
+  margin: 0 auto;
+  background: #3c3c3c;
+  border-radius: 8px;
+  box-shadow: 4px 4px 4px #22222299;
+}
+
+/* 分數背景 */
+.teamBg {
+  background: #f9f9f9;
+  border-radius: 8px;
+  height: 200px;
+  margin: 0px 20px;
+}
+.teamScore {
+  text-align: center;
+  font-size: 72px;
+}
+
+/* 各隊顏色 */
+.teamRed .teamBg {
+  border: 8px solid #ee3636;
+}
+
+.teamBlue .teamBg {
+  border: 8px solid #3030d1;
+}
+
+.teamGreen .teamBg {
+  border: 8px solid green;
+}
+
+.teamPurple .teamBg {
+  border: 8px solid #8b3bbb;
+}
+
+.teamOrange .teamBg {
+  border: 8px solid #e18c0b;
+}
+
+.teamCyan .teamBg {
+  border: 8px solid #02b5b2;
+}
+
+/* 設定按鈕 */
+.set-btn {
+  height: 40px;
+  border-radius: 100px;
+  background: #777777;
+  border: unset;
+}
+
+/* 動畫 */
+.set-btn-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+.set-btn-enter-to {
+  opacity: 1;
+}
+.set-btn-enter-active {
+  transition: all 0.25s ease;
+  transition-timing-function: ease-in-out;
+}

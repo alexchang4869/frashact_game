@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>急中生字</title>
+    <link rel="icon" href="../img/logo.ico" type="image/x-icon" />
+    <!-- Vue CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
+      crossorigin="anonymous"
+    />
+    <!-- BS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+      crossorigin="anonymous"
+    ></script>
+    <!-- font awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- css -->
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="bg">
+        <!-- 單元團體記分板 -->
+        <div
+          id="groupScoreboard"
+          class="position-absolute top-50 start-50 translate-middle w-100"
+        >
+          <div class="container">
+            <!-- 題目 -->
+            <div class="topic-outer fs-3">
+              <div class="topic-bg"></div>
+              <div
+                class="topic position-absolute top-50 start-50 translate-middle"
+              >
+                {{topicArr[currentTopic]}}
+              </div>
+              <div class="pre-topic" @click="preTopic">
+                <i class="fa-solid fa-circle-left"></i>
+              </div>
+              <div class="next-topic" @click="nextTopic">
+                <i class="fa-solid fa-circle-right"></i>
+              </div>
+            </div>
+            <!-- 倒數計時器 -->
+            <div
+              class="countDownArea d-flex justify-content-center align-items-center pb-2"
+            >
+              <!-- 重新計時 -->
+              <button
+                type="button"
+                class="btn btn-primary ms-3"
+                style="width: 50px; height: 50px; border-radius: 100px"
+                @click="countReset(),pauseAudio()"
+              >
+                <i class="fa-solid fa-rotate-right"></i>
+              </button>
+              <div id="sec" class="sec">{{sec}}</div>
+              <!-- 開始計時 -->
+              <button
+                type="button"
+                class="btn btn-primary ms-3"
+                style="width: 50px; height: 50px; border-radius: 100px"
+                @click="countDwn(),playAudio()"
+                v-if="play"
+              >
+                <i class="fa-solid fa-play"></i>
+              </button>
+              <!-- 音樂播放 -->
+              <audio
+                src="./tempo_words_in_a_hurry.mp3"
+                controls
+                ref="audioRef"
+                class="d-none"
+              ></audio>
+              <!-- 暫停計時 -->
+              <button
+                type="button"
+                class="btn btn-primary ms-3"
+                style="width: 50px; height: 50px"
+                @click="countPause(),pauseAudio()"
+                v-if="pause"
+              >
+                <i class="fa-solid fa-pause"></i>
+              </button>
+            </div>
+            <!-- 標題 -->
+            <div class="teamTitle fs-3 text-center text-white py-1 mb-4">
+              急中生字 | 團隊分數
+            </div>
+            <!-- 顯示隊伍 -->
+            <div id="teamDisplay" class="d-flex justify-content-center">
+              <div
+                v-for="(group,index) in groupList"
+                :key="groupList.id"
+                :class="['flex-fill', teamColor[index]]"
+              >
+                <div class="teamBg position-relative">
+                  <div
+                    class="teamScore position-absolute top-50 start-50 translate-middle"
+                  >
+                    {{group.score}}
+                  </div>
+                  <!-- 加分 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    style="
+                      position: absolute;
+                      right: 4px;
+                      bottom: 4px;
+                      background: #f8b01e;
+                      border-radius: 100px;
+                      border: unset;
+                    "
+                    @click="plusNum(group),saveRank()"
+                  >
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                  <!-- 減分 -->
+                  <div style="position: absolute; left: 4px; bottom: 4px">
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      @click="minusNum(group),saveRank()"
+                      v-if="minusBtnDisplay"
+                    >
+                      <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <!-- 刪除 -->
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      @click="removeData(group),saveRank()"
+                      v-if="delBtnDisplay"
+                    >
+                      <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 下排按鈕 -->
+            <div class="container all-set-btns d-flex pt-2">
+              <!-- 回首頁 -->
+              <button
+                type="button"
+                class="btn btn-primary set-btn me-2"
+                @click="goHome"
+              >
+                <i class="fa-solid fa-house"></i>
+              </button>
+              <!-- 設定按鈕 -->
+              <button
+                type="button"
+                class="btn btn-primary set-btn"
+                @click="setBtn = !setBtn"
+              >
+                <i class="fa-solid fa-gear"></i>
+              </button>
+              <!-- 設定按鈕 以外的按鈕 -->
+              <Transition-group name="set-btn">
+                <div class="setting-btns" v-if="setBtn">
+                  <!-- 啟用/關閉新增團隊按鈕 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary ms-2"
+                    @click="addGroup(inputText),saveRank()"
+                  >
+                    <i class="fa-solid fa-user-plus"></i>
+                  </button>
+                  <!-- 啟用/關閉減分按鈕 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary ms-2"
+                    @click="minusBtnDisplay = !minusBtnDisplay"
+                  >
+                    <i class="fa-solid fa-minus"></i>
+                  </button>
+                  <!-- 啟用/關閉移除按鈕 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary ms-2"
+                    @click="delBtnDisplay = !delBtnDisplay"
+                  >
+                    <i class="fa-regular fa-trash-can"></i>
+                  </button></div
+              ></Transition-group>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const app = Vue.createApp({
+        data() {
+          return {
+            // 倒數計時
+            sec: 20,
+            timer: null,
+
+            // 單元團體記分板
+            inputText: "",
+            groupList: [],
+            teamColor: [
+              "teamRed",
+              "teamBlue",
+              "teamGreen",
+              "teamPurple",
+              "teamOrange",
+              "teamCyan",
+            ],
+            // 是否顯示減分按鈕
+            minusBtnDisplay: false,
+            // 是否顯示垃圾桶按鈕
+            delBtnDisplay: false,
+            // 設定按鈕
+            setBtn: false,
+
+            // 倒數計時器
+            play: true,
+            pause: false,
+
+            // 題目
+            topicArr: [
+              "1. 造詞題目：陸地上的動物",
+              "2. 造詞題目：甜的食物",
+              "3. 造詞題目：方形的東西",
+              "4. 造詞題目：國家或地名",
+              "5. 造詞題目：家裡看得到的東西",
+            ],
+            currentTopic: 0,
+          };
+        },
+        methods: {
+          // 音樂
+          playAudio() {
+            this.$refs.audioRef.play();
+          },
+          pauseAudio() {
+            this.$refs.audioRef.pause();
+            this.$refs.audioRef.currentTime = 0;
+          },
+          // 倒數計時
+          countDwn() {
+            this.sec -= 1;
+            if (this.sec > 0) {
+              this.timer = setTimeout(this.countDwn, 1000);
+            }
+            // 切換按鈕
+            this.play = false;
+            this.pause = true;
+          },
+          // 暫停
+          countPause() {
+            clearTimeout(this.timer); // 停止計時
+            // 切換按鈕
+            this.play = true;
+            this.pause = false;
+          },
+          // 重新計時
+          countReset() {
+            clearTimeout(this.timer); // 停止計時
+            this.sec = 20;
+            this.play = true;
+            this.pause = false;
+          },
+          // 共有幾隊
+          addGroup(inputText) {
+            // 團體分數物件
+            const groupObj = {
+              id: new Date().getTime(),
+              team: this.inputText,
+              score: 0,
+            };
+            this.groupList.push(groupObj);
+            this.inputText = "";
+          },
+          // 加分
+          plusNum(item) {
+            this.groupList.forEach((el, i) => {
+              if (item.id == el.id) {
+                this.groupList[i].score += 1;
+              }
+            });
+          },
+          // 減分
+          minusNum(item) {
+            this.groupList.forEach((el, i) => {
+              if (item.id == el.id) {
+                this.groupList[i].score -= 1;
+              }
+            });
+          },
+          // 按下刪除
+          removeData(item) {
+            this.groupList.forEach((el, i) => {
+              if (item.id == el.id) {
+                this.groupList.splice(i, 1);
+              }
+            });
+          },
+          // 存檔
+          saveRank() {
+            localStorage.setItem(
+              "countDownGroup",
+              JSON.stringify(this.groupList)
+            );
+          },
+          // 上一題
+          preTopic() {
+            if (this.currentTopic > 0) {
+              this.currentTopic -= 1;
+            } else {
+              this.currentTopic = this.topicArr.length - 1;
+            }
+          },
+          // 下一題
+          nextTopic() {
+            if (this.currentTopic < this.topicArr.length - 1) {
+              this.currentTopic += 1;
+            } else {
+              this.currentTopic = 0;
+            }
+          },
+          // 回首頁
+          goHome() {
+            location.href = "../index.html";
+          },
+        },
+        computed: {},
+        watch: {},
+        mounted() {
+          // 一開始先讀取 localStorage
+          this.groupList = JSON.parse(localStorage.getItem("countDownGroup"));
+          console.log(this.groupList);
+          if (!this.groupList) {
+            this.groupList = [];
+            console.log("this.groupList");
+            console.log(this.groupList);
+          }
+        },
+      });
+
+      app.mount("#app");
+    </script>
+  </body>
+</html>

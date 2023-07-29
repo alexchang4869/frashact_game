@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>排行榜</title>
+    <link rel="icon" href="../img/logo.ico" type="image/x-icon" />
+    <!-- Vue CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
+      crossorigin="anonymous"
+    />
+    <!-- BS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+      crossorigin="anonymous"
+    ></script>
+    <!-- font awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- css -->
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="p-3 rank-bg">
+        <div class="joinPerson" v-if="joinBtnDisplay">
+          <div class="pop-bg"></div>
+          <div class="input-group mb-3">
+            <input
+              type="text"
+              v-model="text"
+              class="form-control"
+              placeholder="請輸入暱稱"
+              aria-label="請輸入暱稱"
+              aria-describedby="button-addon2"
+            />
+            <button
+              class="btn btn-outline-secondary check-join-btn"
+              type="button"
+              id="button-addon-cancel"
+              @click="joinBtnDisplay = !joinBtnDisplay"
+            >
+              取消
+            </button>
+            <button
+              class="btn btn-outline-secondary check-join-btn"
+              type="button"
+              id="button-addon2"
+              @click="addData(),saveRank()"
+            >
+              新增一人
+            </button>
+          </div>
+        </div>
+
+        <div class="position-relative mt-5">
+          <div class="h2-title">
+            <h2 class="text-center">排行榜</h2>
+          </div>
+          <div class="container list-outer flex-wrap d-flex flex-column">
+            <Transition-group name="fade">
+              <div v-for="(item,i) in list" :key="item.id" class="list-li ps-5">
+                <div class="list-content d-flex align-items-center">
+                  <div class="rank-num">{{i+1}}</div>
+                  <div class="rank-text d-flex flex-grow-1 px-4">
+                    <div class="flex-grow-1">{{item.text}}</div>
+                    <div>{{item.score}}</div>
+                  </div>
+                  <!-- 加分 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary me-2"
+                    @click="plusNum(item),saveRank()"
+                    v-if="plusBtnDisplay"
+                  >
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                  <!-- 減分 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary me-2"
+                    @click="minusNum(item),saveRank()"
+                    v-if="minusBtnDisplay"
+                  >
+                    <i class="fa-solid fa-minus"></i>
+                  </button>
+                  <!-- 編輯名稱 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary me-2"
+                    @click="editData(item)"
+                    v-if="editBtnDisplay"
+                  >
+                    <i class="fa-regular fa-pen-to-square"></i>
+                  </button>
+                  <!-- 刪除 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="removeData(item),saveRank()"
+                    v-if="delBtnDisplay"
+                  >
+                    <i class="fa-regular fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+            </Transition-group>
+          </div>
+        </div>
+
+        <!-- 下排按鈕 -->
+        <div class="container all-set-btns d-flex pt-2">
+          <!-- 回首頁 -->
+          <button
+            type="button"
+            class="btn btn-primary set-btn me-2"
+            @click="goHome"
+          >
+            <i class="fa-solid fa-house"></i>
+          </button>
+          <!-- 設定按鈕 -->
+          <button
+            type="button"
+            class="btn btn-primary set-btn"
+            @click="setBtn = !setBtn"
+          >
+            <i class="fa-solid fa-gear"></i>
+          </button>
+          <!-- 設定按鈕 以外的按鈕 -->
+          <Transition-group name="set-btn">
+            <div class="setting-btns" v-if="setBtn">
+              <!-- 啟用/關閉加分按鈕 -->
+              <button
+                type="button"
+                class="btn btn-primary ms-2"
+                @click="plusBtnDisplay = !plusBtnDisplay"
+              >
+                <i class="fa-solid fa-plus"></i>
+              </button>
+              <!-- 啟用/關閉減分按鈕 -->
+              <button
+                type="button"
+                class="btn btn-primary ms-2"
+                @click="minusBtnDisplay = !minusBtnDisplay"
+              >
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <!-- 啟用/關閉編輯按鈕 -->
+              <button
+                type="button"
+                class="btn btn-primary ms-2"
+                @click="editBtnDisplay = !editBtnDisplay"
+              >
+                <i class="fa-regular fa-pen-to-square"></i>
+              </button>
+              <!-- 啟用/關閉加人按鈕 -->
+              <button
+                type="button"
+                class="btn btn-primary ms-2"
+                @click="joinBtnDisplay = !joinBtnDisplay"
+              >
+                <i class="fa-solid fa-user-plus"></i>
+              </button>
+              <!-- 啟用/關閉移除按鈕 -->
+              <button
+                type="button"
+                class="btn btn-primary ms-2"
+                @click="delBtnDisplay = !delBtnDisplay"
+              >
+                <i class="fa-regular fa-trash-can"></i>
+              </button></div
+          ></Transition-group>
+
+          <!-- 排序 -->
+          <button
+            type="button"
+            class="btn btn-primary ms-auto sort-check"
+            @click="sortRank(),saveRank()"
+          >
+            <i class="fa-solid fa-flag-checkered"></i>
+          </button>
+        </div>
+        <hr />
+        <!-- 編輯名稱 -->
+        <div class="edit-area-outer" v-if="editArea">
+          <div class="pop-bg"></div>
+          <div class="edit-area" v-if="tempData.id">
+            <input type="text" v-model="tempData.text" />
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click="confirm(),saveRank()"
+            >
+              <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const app = Vue.createApp({
+        data() {
+          return {
+            // 新增人名的輸入框
+            text: "",
+            // 顯示的排行資料
+            list: [],
+            // 編輯名字暫存
+            tempData: {},
+            // 是否顯示編輯名字區域
+            editArea: false,
+            // 設定按鈕
+            setBtn: false,
+            // 是否顯示增加人數區域
+            joinBtnDisplay: false,
+            // 是否顯示編輯按鈕
+            editBtnDisplay: false,
+            // 是否顯示垃圾桶按鈕
+            delBtnDisplay: false,
+            // 是否顯示加分按鈕
+            plusBtnDisplay: false,
+            // 是否顯示減分按鈕
+            minusBtnDisplay: false,
+          };
+        },
+        methods: {
+          // 增加一人資料
+          addData() {
+            // 建立新的資料
+            const newData = {
+              id: new Date().getTime(), // 資料一定要加入 id，使用隨機值
+              text: this.text,
+              score: 0,
+            };
+            // 新增加入資料
+            this.list.push(newData);
+            // 清空輸入框
+            this.text = "";
+          },
+          // 編輯人名
+          editData(item) {
+            // 按下編輯後，把 item 整筆傳入 tempData
+            // 一定要展開，避免連動
+            this.tempData = { ...item };
+            // 顯示編輯名稱區塊
+            this.editArea = true;
+          },
+          // 完成編輯人名
+          confirm() {
+            // 按下確認之後，逐筆確認
+            this.list.forEach((item, i) => {
+              // 如果 id 相同，就改變完成編輯的內容
+              if (item.id === this.tempData.id) {
+                // item = this.tempData; // 不可這樣寫，沒帶索引改不到
+                // 這裡一定要帶 [i]
+                this.list[i] = this.tempData;
+              }
+            });
+            // 清空暫存區資料
+            this.tempData = {};
+            // 隱藏編輯名稱區塊
+            this.editArea = false;
+          },
+          // 按下刪除
+          removeData(item) {
+            this.list.forEach((el, i) => {
+              if (item.id == el.id) {
+                this.list.splice(i, 1);
+              }
+            });
+          },
+          // 加分
+          plusNum(item) {
+            this.list.forEach((el, i) => {
+              if (item.id == el.id) {
+                this.list[i].score += 5;
+              }
+            });
+          },
+          // 減分
+          minusNum(item) {
+            this.list.forEach((el, i) => {
+              if (item.id == el.id) {
+                this.list[i].score -= 5;
+              }
+            });
+          },
+          // 排序
+          sortRank() {
+            this.list.sort((a, b) => {
+              return b.score - a.score;
+            });
+          },
+          // 存檔
+          saveRank() {
+            console.log("存檔");
+            localStorage.setItem("listData", JSON.stringify(this.list));
+          },
+          // 回首頁
+          goHome() {
+            location.href = "../index.html";
+          },
+        },
+        computed: {},
+        watch: {},
+        mounted() {
+          //一開始先讀取 localStorage
+          let preloadData = JSON.parse(localStorage.getItem("listData"));
+          // 如果有資料
+          if (preloadData) {
+            this.list = JSON.parse(localStorage.getItem("listData"));
+          }
+        },
+      });
+      app.mount("#app");
+    </script>
+  </body>
+</html>
