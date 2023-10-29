@@ -66,6 +66,10 @@
             id="toggleFullScreen"
             class="btn btn-outline-primary me-3"
             style="width: 64px"
+            :style="(currentIndex===17)?{
+              color: 'rgba(0,0,0,0)',
+              borderColor: 'rgba(0,0,0,0)',
+              background: 'rgba(0,0,0,0)'}:{}"
             @click="toggleFullScreen"
           >
             <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
@@ -75,6 +79,10 @@
             id="preSwitchImg"
             class="btn me-3"
             style="width: 64px"
+            :style="(currentIndex===17)?{
+              color: 'rgba(0,0,0,0)',
+              borderColor: 'rgba(0,0,0,0)',
+              background: 'rgba(0,0,0,0)'}:{}"
             :class="(currentIndex !== 0)?'btn-outline-primary':'disabled'"
             @click="preSwitchImg($event)"
           >
@@ -85,10 +93,25 @@
             id="nextSwitchImg"
             class="btn"
             style="width: 64px"
+            :style="(currentIndex===17)?{
+              color: 'rgba(0,0,0,0)',
+              borderColor: 'rgba(0,0,0,0)',
+              background: 'rgba(0,0,0,0)'}:{}"
             :class="currentIndex !== (totalImgsCnt - 1)?'btn-outline-primary':'disabled'"
             @click="nextSwitchImg($event)"
           >
             <i class="fa-solid fa-caret-right"></i>
+          </button>
+          <button
+            type="button"
+            id="jumpSwitchImg"
+            class="btn ms-3"
+            style="width: 64px"
+            :class="currentIndex !== (totalImgsCnt - 1)?'btn-outline-primary':'disabled'"
+            @click="jumpSwitchImg($event)"
+            v-if="hasFinalGame"
+          >
+            <i class="fa-solid fa-forward"></i>
           </button>
         </div>
       </div>
@@ -124,10 +147,13 @@
               { id: "img-id-23", src: "../img/pptImg/23.jpg", alt: "23" },
               { id: "img-id-24", src: "../img/pptImg/24.jpg", alt: "24" },
               { id: "img-id-25", src: "../img/pptImg/25.jpg", alt: "25" },
+              { id: "img-id-26", src: "../img/pptImg/26.jpg", alt: "26" },
+              { id: "img-id-27", src: "../img/pptImg/27.jpg", alt: "27" },
             ],
 
             totalImgsCnt: 0,
             currentIndex: 0,
+            hasFinalGame: false,
 
             // 全螢幕
             isFullScreen: false,
@@ -140,6 +166,13 @@
               this.currentIndex = 0;
               console.log("第一頁");
             }
+
+            // 跳頁
+            if (this.currentIndex === 14) {
+              this.hasFinalGame = true;
+            } else {
+              this.hasFinalGame = false;
+            }
           },
           nextSwitchImg(event) {
             this.currentIndex++;
@@ -147,6 +180,18 @@
               this.currentIndex = this.totalImgsCnt - 1;
               console.log("最後一頁");
             }
+
+            // 跳頁
+            if (this.currentIndex === 14) {
+              this.hasFinalGame = true;
+            } else {
+              this.hasFinalGame = false;
+            }
+          },
+          // 跳頁，跳過爭冠遊戲
+          jumpSwitchImg(event) {
+            this.currentIndex += 2;
+            this.hasFinalGame = false;
           },
           // 全螢幕
           toggleFullScreen() {
