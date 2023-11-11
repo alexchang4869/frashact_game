@@ -114,6 +114,36 @@
             <i class="fa-solid fa-forward"></i>
           </button>
         </div>
+
+        <!-- 連結計分頁 -->
+        <div class="position-absolute top-0 end-0">
+          <div class="mt-2 me-2">
+            <a
+              :href="gameList[gameListCnt]"
+              target="_blank"
+              :class="gameListDisplay?'':'d-none'"
+            >
+              <button
+                type="button"
+                class="btn btn-outline-primary rounded me-2"
+              >
+                <i class="fa-solid fa-gamepad"></i>
+              </button>
+            </a>
+            <a
+              href="../rank"
+              target="_blank"
+              :class="currentIndex <= 16?'':'d-none'"
+            >
+              <button
+                type="button"
+                class="btn btn-outline-primary rounded me-2"
+              >
+                <i class="fa-solid fa-ranking-star"></i>
+              </button>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -151,6 +181,11 @@
               { id: "img-id-27", src: "../img/pptImg/27.jpg", alt: "27" },
             ],
 
+            // 是否顯示右上角跳至遊戲頁的按鈕
+            gameListDisplay: false,
+            gameListCnt: 0,
+            gameList: ["../charades", "../countDown", "../wordChain"],
+
             totalImgsCnt: 0,
             currentIndex: 0,
             hasFinalGame: false,
@@ -173,6 +208,20 @@
             } else {
               this.hasFinalGame = false;
             }
+
+            // 顯示遊戲連結按鈕
+            if (this.currentIndex === 7) {
+              this.gameListDisplay = true;
+              this.gameListCnt = 0;
+            } else if (this.currentIndex === 10) {
+              this.gameListDisplay = true;
+              this.gameListCnt = 1;
+            } else if (this.currentIndex === 13) {
+              this.gameListDisplay = true;
+              this.gameListCnt = 2;
+            } else {
+              this.gameListDisplay = false;
+            }
           },
           nextSwitchImg(event) {
             this.currentIndex++;
@@ -186,6 +235,20 @@
               this.hasFinalGame = true;
             } else {
               this.hasFinalGame = false;
+            }
+
+            // 顯示遊戲連結按鈕
+            if (this.currentIndex === 7) {
+              this.gameListDisplay = true;
+              this.gameListCnt = 0;
+            } else if (this.currentIndex === 10) {
+              this.gameListDisplay = true;
+              this.gameListCnt = 1;
+            } else if (this.currentIndex === 13) {
+              this.gameListDisplay = true;
+              this.gameListCnt = 2;
+            } else {
+              this.gameListDisplay = false;
             }
           },
           // 跳頁，跳過爭冠遊戲
