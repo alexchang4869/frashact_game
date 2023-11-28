@@ -52,6 +52,22 @@
               aria-label="請輸入暱稱"
               aria-describedby="button-addon2"
             />
+            <input
+              type="sex"
+              v-model="sex"
+              class="form-control"
+              placeholder="女生0、男生1"
+              aria-label="女生0、男生1"
+              aria-describedby="button-addon2"
+            />
+            <input
+              type="team"
+              v-model="team"
+              class="form-control"
+              placeholder="ABC...依序"
+              aria-label="ABC...依序"
+              aria-describedby="button-addon2"
+            />
             <button
               class="btn btn-outline-secondary check-join-btn"
               type="button"
@@ -82,7 +98,7 @@
                   <div class="rank-num">{{i+1}}</div>
                   <div class="rank-text d-flex flex-grow-1 px-4">
                     <div class="flex-grow-1">{{item.text}}</div>
-                    <div>{{item.score}}</div>
+                    <div>{{item.score}} [{{item.team}}]</div>
                   </div>
                   <!-- 加分 -->
                   <button
@@ -92,6 +108,15 @@
                     v-if="plusBtnDisplay"
                   >
                     <i class="fa-solid fa-plus"></i>
+                  </button>
+                  <!-- 團隊 加分 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary me-2"
+                    @click="plusNumTeam(),saveRank()"
+                    v-if="plusBtnDisplayTeam"
+                  >
+                    團<i class="fa-solid fa-plus"></i>
                   </button>
                   <!-- 減分 -->
                   <button
@@ -154,6 +179,14 @@
                 @click="plusBtnDisplay = !plusBtnDisplay"
               >
                 <i class="fa-solid fa-plus"></i>
+              </button>
+              <!-- 啟用/關閉 團隊 加分按鈕 -->
+              <button
+                type="button"
+                class="btn btn-primary ms-2"
+                @click="plusBtnDisplayTeam = !plusBtnDisplayTeam"
+              >
+                團<i class="fa-solid fa-plus"></i>
               </button>
               <!-- 啟用/關閉減分按鈕 -->
               <button
@@ -222,8 +255,12 @@
           return {
             // 新增人名的輸入框
             text: "",
+            // 新增性別輸入框
+            sex: "",
             // 顯示的排行資料
             list: [],
+            // 隊伍
+            team: "",
             // 編輯名字暫存
             tempData: {},
             // 是否顯示編輯名字區域
@@ -236,8 +273,13 @@
             editBtnDisplay: false,
             // 是否顯示垃圾桶按鈕
             delBtnDisplay: false,
+
+            // 團隊 加減
+            whatTeamAction: "B",
             // 是否顯示加分按鈕
             plusBtnDisplay: false,
+            // 是否顯示 團隊 加分按鈕
+            plusBtnDisplayTeam: false,
             // 是否顯示減分按鈕
             minusBtnDisplay: false,
           };
@@ -250,11 +292,17 @@
               id: new Date().getTime(), // 資料一定要加入 id，使用隨機值
               text: this.text,
               score: 0,
+              sex: this.sex, // 0 女 1 男
+              team: this.team, // 隊伍
             };
             // 新增加入資料
             this.list.push(newData);
             // 清空輸入框
             this.text = "";
+            this.sex = "";
+            this.team = "";
+
+            console.log(this.list);
           },
           // 編輯人名
           editData(item) {
@@ -292,6 +340,14 @@
           plusNum(item) {
             this.list.forEach((el, i) => {
               if (item.id == el.id) {
+                this.list[i].score += 9;
+              }
+            });
+          },
+          // 團隊加分
+          plusNumTeam() {
+            this.list.forEach((el, i) => {
+              if (el.team === this.whatTeamAction) {
                 this.list[i].score += 9;
               }
             });
