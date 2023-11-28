@@ -50,23 +50,20 @@
               class="form-control"
               placeholder="請輸入暱稱"
               aria-label="請輸入暱稱"
-              aria-describedby="button-addon2"
             />
             <input
-              type="sex"
+              type="text"
               v-model="sex"
               class="form-control"
               placeholder="女生0、男生1"
               aria-label="女生0、男生1"
-              aria-describedby="button-addon2"
             />
             <input
-              type="team"
+              type="text"
               v-model="team"
               class="form-control"
-              placeholder="ABC...依序"
-              aria-label="ABC...依序"
-              aria-describedby="button-addon2"
+              placeholder="A / B"
+              aria-label="A / B"
             />
             <button
               class="btn btn-outline-secondary check-join-btn"
@@ -95,10 +92,16 @@
             <Transition-group name="fade">
               <div v-for="(item,i) in list" :key="item.id" class="list-li ps-5">
                 <div class="list-content d-flex align-items-center">
-                  <div class="rank-num">{{i+1}}</div>
+                  <div class="rank-num" v-if="isRank">{{i+1}}</div>
+                  <div class="rank-num" v-if="!isRank && item.team==='A'">
+                    <img src="../img/santa.png" style="width: 40px" />
+                  </div>
+                  <div class="rank-num" v-if="!isRank && item.team==='B'">
+                    <img src="../img/elk.png" style="width: 40px" />
+                  </div>
                   <div class="rank-text d-flex flex-grow-1 px-4">
                     <div class="flex-grow-1">{{item.text}}</div>
-                    <div>{{item.score}} [{{item.team}}]</div>
+                    <div>{{item.score}} [{{item.sex==1?'男':'女'}}]</div>
                   </div>
                   <!-- 加分 -->
                   <button
@@ -108,15 +111,6 @@
                     v-if="plusBtnDisplay"
                   >
                     <i class="fa-solid fa-plus"></i>
-                  </button>
-                  <!-- 團隊 加分 -->
-                  <button
-                    type="button"
-                    class="btn btn-primary me-2"
-                    @click="plusNumTeam(),saveRank()"
-                    v-if="plusBtnDisplayTeam"
-                  >
-                    團<i class="fa-solid fa-plus"></i>
                   </button>
                   <!-- 減分 -->
                   <button
@@ -180,14 +174,6 @@
               >
                 <i class="fa-solid fa-plus"></i>
               </button>
-              <!-- 啟用/關閉 團隊 加分按鈕 -->
-              <button
-                type="button"
-                class="btn btn-primary ms-2"
-                @click="plusBtnDisplayTeam = !plusBtnDisplayTeam"
-              >
-                團<i class="fa-solid fa-plus"></i>
-              </button>
               <!-- 啟用/關閉減分按鈕 -->
               <button
                 type="button"
@@ -219,13 +205,51 @@
                 @click="delBtnDisplay = !delBtnDisplay"
               >
                 <i class="fa-regular fa-trash-can"></i>
-              </button></div
-          ></Transition-group>
+              </button>
+
+              <!-- 團隊 減分 -->
+              <button
+                type="button"
+                class="btn btn-primary mx-2"
+                @click="minusNumTeam(),saveRank()"
+              >
+                團隊 <i class="fa-solid fa-minus"></i>
+              </button>
+            </div>
+          </Transition-group>
+
+          <!-- 團隊 加分 -->
+          <div class="d-inline-block">
+            <div class="d-flex justify-content-center ms-3">
+              <input
+                type="text"
+                v-model="whatTeamAction"
+                class="form-control"
+                style="white-space: nowrap; width: 60px"
+                placeholder="A / B"
+              />
+              <button
+                type="button"
+                class="btn btn-primary mx-2"
+                @click="plusNumTeam(),saveRank()"
+              >
+                團隊 <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary ms-auto"
+            @click="reallocate(),teamRank(),saveRank()"
+          >
+            重新分隊
+          </button>
 
           <!-- 排序 -->
           <button
             type="button"
-            class="btn btn-primary ms-auto sort-check"
+            class="btn btn-primary ms-3 sort-check"
             @click="sortRank(),saveRank()"
           >
             <i class="fa-solid fa-flag-checkered"></i>
@@ -273,13 +297,15 @@
             editBtnDisplay: false,
             // 是否顯示垃圾桶按鈕
             delBtnDisplay: false,
+            // 顯示依照團隊 or 分數排行
+            isRank: false,
 
             // 團隊 加減
-            whatTeamAction: "B",
+            whatTeamAction: "",
             // 是否顯示加分按鈕
             plusBtnDisplay: false,
             // 是否顯示 團隊 加分按鈕
-            plusBtnDisplayTeam: false,
+            // plusBtnDisplayTeam: false,
             // 是否顯示減分按鈕
             minusBtnDisplay: false,
           };
@@ -360,10 +386,110 @@
               }
             });
           },
+          // 團隊減分
+          minusNumTeam() {
+            this.list.forEach((el, i) => {
+              if (el.team === this.whatTeamAction) {
+                this.list[i].score -= 9;
+              }
+            });
+          },
           // 排序
           sortRank() {
+            this.isRank = true;
             this.list.sort((a, b) => {
               return b.score - a.score;
+            });
+          },
+          // 重新分隊
+          reallocate() {
+            // 總人數
+            let totalCnt = this.list.length;
+            // 男女生人數
+            let boyCnt = 0;
+            let girlCnt = 0;
+            this.list.forEach((el, i) => {
+              if (el.sex === "1") {
+                boyCnt++;
+              } else {
+                girlCnt++;
+              }
+            });
+
+            // 各隊剩餘人數
+            let A_RemainBoy =
+              boyCnt % 2 === 0 ? boyCnt / 2 : Math.floor(boyCnt / 2) + 1;
+            let A_RemainGirl =
+              girlCnt % 2 === 0 ? girlCnt / 2 : Math.floor(girlCnt / 2);
+            let B_RemainBoy =
+              boyCnt % 2 === 0 ? boyCnt / 2 : Math.floor(boyCnt / 2);
+            let B_RemainGirl =
+              girlCnt % 2 === 0 ? girlCnt / 2 : Math.floor(girlCnt / 2) + 1;
+
+            console.log(
+              `A男：${A_RemainBoy}，A女生：${A_RemainGirl}，B男生：${B_RemainBoy}，B女生：${B_RemainGirl}`
+            );
+
+            let teamArr = ["A", "B"];
+
+            this.list.forEach((el, i) => {
+              do {
+                let randomBinary = Math.floor(Math.random() * 2);
+                el.team = teamArr[randomBinary];
+                if (
+                  el.sex === "1" &&
+                  teamArr[randomBinary] === "A" &&
+                  A_RemainBoy > 0
+                ) {
+                  // 男生分到A隊
+                  A_RemainBoy--;
+                  break;
+                } else if (
+                  el.sex === "1" &&
+                  teamArr[randomBinary] === "B" &&
+                  B_RemainBoy > 0
+                ) {
+                  // 男生分到B隊
+                  B_RemainBoy--;
+                  break;
+                } else if (
+                  el.sex === "0" &&
+                  teamArr[randomBinary] === "A" &&
+                  A_RemainGirl > 0
+                ) {
+                  // 女生分到A隊
+                  A_RemainGirl--;
+                  break;
+                } else if (
+                  el.sex === "0" &&
+                  teamArr[randomBinary] === "B" &&
+                  B_RemainGirl > 0
+                ) {
+                  // 女生分到B隊
+                  B_RemainGirl--;
+                  break;
+                }
+              } while (true);
+              // 都沒分進去，要再抽一次
+            });
+
+            // 改成團隊排行
+            this.isRank = false;
+
+            console.log(this.list);
+          },
+          // 依照團隊分組
+          teamRank() {
+            this.list.sort((a, b) => {
+              // 先按照 team 升序排序
+              const teamComparison = a.team.localeCompare(b.team);
+
+              // 如果 team 相同，依照 score 排序
+              if (teamComparison === 0) {
+                return b.score - a.score;
+              }
+
+              return teamComparison;
             });
           },
           // 存檔
