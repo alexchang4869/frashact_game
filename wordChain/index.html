@@ -46,9 +46,59 @@
           id="groupScoreboard"
           class="position-absolute top-50 start-50 translate-middle w-100"
         >
+          <!-- 命數 -->
+          <div class="d-flex flex-column flex-wrap px-5" style="height: 400px">
+            <div
+              class="d-flex align-items-center p-2 m-1 rounded-3"
+              style="background-color: rgba(255, 255, 255, 0.5)"
+              v-for="item in list"
+              :key="item.id"
+            >
+              <div class="d-inline-block flex-fill fs-5">
+                <div class="d-inline-block rank-num" v-if="item.team==='A'">
+                  <img src="../img/santa.png" style="width: 40px" />
+                </div>
+                <div class="d-inline-block rank-num" v-if="item.team==='B'">
+                  <img src="../img/elk.png" style="width: 40px" />
+                </div>
+                {{item.text}}
+              </div>
+              <template v-if="item.life > 0">
+                <div
+                  class="d-inline-block"
+                  v-for="hearts in item.life"
+                  :key="hearts"
+                >
+                  <i
+                    class="fa-solid fa-heart fs-2 m-1"
+                    style="color: red"
+                  ></i></div
+              ></template>
+              <template v-if="item.life <= 0">
+                <i
+                  class="fa-solid fa-skull-crossbones fs-2 m-1"
+                  style="color: black"
+                ></i
+              ></template>
+              <button
+                type="button"
+                class="btn btn-primary ms-1"
+                @click="minusLife(item),saveRank()"
+              >
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary ms-1"
+                @click="plusLife(item),saveRank()"
+              >
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+          </div>
           <!-- 標題 -->
           <div class="teamTitle fs-3 text-center text-white py-1 mb-5 w-50">
-            Tempo 遊戲 | 個人賽
+            Tempo 遊戲 | 團隊 + 個人賽
           </div>
           <div class="container w-50">
             <!-- Tempo音樂 -->
@@ -143,6 +193,9 @@
             // 播放或暫停
             play: true,
             pause: false,
+
+            // 所有人
+            list: [],
           };
         },
         methods: {
@@ -181,6 +234,27 @@
               this.$refs.audioRef.playbackRate = this.playbackRate;
             }
           },
+          // 加命
+          plusLife(item) {
+            this.list.forEach((el, i) => {
+              if (el.id === item.id) {
+                this.list[i].life += 1;
+              }
+            });
+          },
+          // 減命
+          minusLife(item) {
+            this.list.forEach((el, i) => {
+              if (el.id === item.id) {
+                this.list[i].life -= 1;
+              }
+            });
+          },
+          // 存檔
+          saveRank() {
+            console.log("存檔");
+            localStorage.setItem("listData", JSON.stringify(this.list));
+          },
 
           // 回首頁
           goHome() {
@@ -189,7 +263,14 @@
         },
         computed: {},
         watch: {},
-        mounted() {},
+        mounted() {
+          //一開始先讀取 localStorage
+          let preloadData = JSON.parse(localStorage.getItem("listData"));
+          // 如果有資料
+          if (preloadData) {
+            this.list = JSON.parse(localStorage.getItem("listData"));
+          }
+        },
       });
 
       app.mount("#app");

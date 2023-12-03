@@ -66,7 +66,7 @@
             id="toggleFullScreen"
             class="btn btn-outline-primary me-3"
             style="width: 64px"
-            :style="(currentIndex===17)?{
+            :style="(currentIndex===17 || currentIndex===18)?{
               color: 'rgba(0,0,0,0)',
               borderColor: 'rgba(0,0,0,0)',
               background: 'rgba(0,0,0,0)'}:{}"
@@ -79,7 +79,7 @@
             id="preSwitchImg"
             class="btn me-3"
             style="width: 64px"
-            :style="(currentIndex===17)?{
+            :style="(currentIndex===17 || currentIndex===18)?{
               color: 'rgba(0,0,0,0)',
               borderColor: 'rgba(0,0,0,0)',
               background: 'rgba(0,0,0,0)'}:{}"
@@ -93,7 +93,7 @@
             id="nextSwitchImg"
             class="btn"
             style="width: 64px"
-            :style="(currentIndex===17)?{
+            :style="(currentIndex===17 || currentIndex===18)?{
               color: 'rgba(0,0,0,0)',
               borderColor: 'rgba(0,0,0,0)',
               background: 'rgba(0,0,0,0)'}:{}"
@@ -178,7 +178,6 @@
               { id: "img-id-24", src: "../img/pptImg/24.jpg", alt: "24" },
               { id: "img-id-25", src: "../img/pptImg/25.jpg", alt: "25" },
               { id: "img-id-26", src: "../img/pptImg/26.jpg", alt: "26" },
-              { id: "img-id-27", src: "../img/pptImg/27.jpg", alt: "27" },
             ],
 
             // 是否顯示右上角跳至遊戲頁的按鈕

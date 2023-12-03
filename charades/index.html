@@ -56,6 +56,52 @@
             <div class="teamTitle fs-3 text-center text-white py-1 mb-4">
               比手畫腳 | 團隊分數
             </div>
+            <div class="container w-50">
+              <!-- 音樂 -->
+              <div
+                class="countDownArea d-flex justify-content-center align-items-center flex-column pb-2"
+              >
+                <div class="d-flex align-items-center">
+                  <!-- 歸零 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary mx-3"
+                    style="width: 50px; height: 50px; border-radius: 100px"
+                    @click="resetAudio"
+                  >
+                    <i class="fa-solid fa-rotate-right"></i>
+                  </button>
+                  <div>
+                    <audio
+                      src="./hand.mp3"
+                      controls
+                      loop
+                      ref="audioRef"
+                    ></audio>
+                  </div>
+                  <!-- 開始播放 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary ms-3"
+                    style="width: 50px; height: 50px; border-radius: 100px"
+                    @click="playAudio"
+                    v-if="play"
+                  >
+                    <i class="fa-solid fa-play"></i>
+                  </button>
+                  <!-- 暫停播放 -->
+                  <button
+                    type="button"
+                    class="btn btn-primary ms-3"
+                    style="width: 50px; height: 50px"
+                    @click="pauseAudio"
+                    v-if="pause"
+                  >
+                    <i class="fa-solid fa-pause"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
             <!-- 顯示隊伍 -->
             <div id="teamDisplay" class="d-flex justify-content-center">
               <div
@@ -186,24 +232,30 @@
             delBtnDisplay: false,
             // 設定按鈕
             setBtn: false,
+            // 播放或暫停
+            play: true,
+            pause: false,
           };
         },
         methods: {
-          // 倒數計時
-          countDwn() {
-            this.sec -= 1;
-            if (this.sec > 0) {
-              this.timer = setTimeout(this.countDwn, 1000);
-            }
+          // 開始播放
+          playAudio() {
+            this.$refs.audioRef.play();
+            this.play = false;
+            this.pause = true;
           },
-          // 暫停
-          countPause() {
-            clearTimeout(this.timer); // 停止計時
+          // 暫停播放
+          pauseAudio() {
+            this.$refs.audioRef.pause();
+            this.play = true;
+            this.pause = false;
           },
-          // 重新計時
-          countReset() {
-            clearTimeout(this.timer); // 停止計時
-            this.sec = 20;
+          // 暫停播放
+          resetAudio() {
+            this.$refs.audioRef.pause();
+            this.$refs.audioRef.currentTime = 0;
+            this.play = true;
+            this.pause = false;
           },
           // 共有幾隊
           addGroup(inputText) {
